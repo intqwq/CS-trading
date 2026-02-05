@@ -22,7 +22,6 @@ cs-trading --config config/example.yaml
 See `config/example.yaml` for the full schema. Key settings:
 - `buff.base_url`: BUFF API base URL
 - `scanner.bonus_limit_pct`: max bonus in percent (e.g. 5.0)
-- `scanner.fee_pct`: marketplace fee used in margin calculations
 - `scanner.budget_cny`: total budget in CNY
 - `scanner.circuit_breaker_cny`: halt threshold in CNY
 - `output.csv_path`: where to write log output

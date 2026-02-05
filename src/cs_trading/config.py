@@ -16,13 +16,11 @@ class BuffConfig(BaseModel):
 
 class ScannerConfig(BaseModel):
     bonus_limit_pct: float = 5.0
-    fee_pct: float = 2.5
     budget_cny: float = 5000.0
     circuit_breaker_cny: float = 1000.0
     min_volume: int = 20
     min_margin_pct: float = 2.0
     max_spread_pct: float = 15.0
-    max_pages: int = 1
 
 
 class OutputConfig(BaseModel):

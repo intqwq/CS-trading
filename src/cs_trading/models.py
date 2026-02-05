@@ -25,7 +25,5 @@ class Opportunity:
     margin_pct: float
     bonus_pct: float
     score: float
-    expected_profit_cny: float
-    spread_pct: float
     volume: int
     source: str

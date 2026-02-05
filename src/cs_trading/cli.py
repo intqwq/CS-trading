@@ -10,7 +10,7 @@ from .buff_client import BuffClient, iter_goods_pages
 from .config import AppConfig, load_config
 from .csv_writer import write_opportunities
 from .models import ItemListing, Opportunity
-from .scoring import ScoreInputs, compute_expected_profit, compute_score
+from .scoring import ScoreInputs, compute_score
 
 
 def parse_goods(payload: dict) -> Iterable[ItemListing]:
@@ -61,6 +61,12 @@ def scan_market(config: AppConfig, max_pages: int) -> List[Opportunity]:
             buy_cny = listing.buy_max_cny or listing.sell_min_cny
             sell_cny = listing.sell_min_cny
 
+            if buy_cny > config.scanner.budget_cny:
+                continue
+
+            if buy_cny >= config.scanner.circuit_breaker_cny:
+                return opportunities
+
             spread_pct = compute_spread_pct(buy_cny, sell_cny)
             if spread_pct > config.scanner.max_spread_pct:
                 continue
@@ -73,16 +79,10 @@ def scan_market(config: AppConfig, max_pages: int) -> List[Opportunity]:
                 ),
                 bonus_limit_pct=config.scanner.bonus_limit_pct,
                 min_margin_pct=config.scanner.min_margin_pct,
-                fee_pct=config.scanner.fee_pct,
             )
             if score <= 0:
                 continue
 
-            expected_profit_cny = compute_expected_profit(
-                buy_cny,
-                sell_cny,
-                fee_pct=config.scanner.fee_pct,
-            )
             bonus_pct = max(0.0, score - margin_pct)
             opportunities.append(
                 Opportunity(
@@ -94,8 +94,6 @@ def scan_market(config: AppConfig, max_pages: int) -> List[Opportunity]:
                     margin_pct=margin_pct,
                     bonus_pct=bonus_pct,
                     score=score,
-                    expected_profit_cny=expected_profit_cny,
-                    spread_pct=spread_pct,
                     volume=listing.volume,
                     source="BUFF",
                 )
@@ -106,33 +104,10 @@ def scan_market(config: AppConfig, max_pages: int) -> List[Opportunity]:
     return opportunities
 
 
-def select_opportunities(
-    opportunities: List[Opportunity],
-    budget_cny: float,
-    circuit_breaker_cny: float,
-) -> List[Opportunity]:
-    ranked = sorted(opportunities, key=lambda opp: opp.score, reverse=True)
-    selected: List[Opportunity] = []
-    total_spend = 0.0
-    cumulative_loss = 0.0
-
-    for opp in ranked:
-        if total_spend + opp.buy_cny > budget_cny:
-            continue
-        if opp.expected_profit_cny < 0:
-            cumulative_loss += abs(opp.expected_profit_cny)
-        if cumulative_loss >= circuit_breaker_cny:
-            break
-        selected.append(opp)
-        total_spend += opp.buy_cny
-
-    return selected
-
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="BUFF CS trading scanner")
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--pages", type=int)
+    parser.add_argument("--pages", type=int, default=1)
     return parser
 
 
@@ -141,13 +116,7 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_config(args.config)
-    max_pages = args.pages or config.scanner.max_pages
-    opportunities = scan_market(config, max_pages=max_pages)
-    opportunities = select_opportunities(
-        opportunities,
-        budget_cny=config.scanner.budget_cny,
-        circuit_breaker_cny=config.scanner.circuit_breaker_cny,
-    )
+    opportunities = scan_market(config, max_pages=args.pages)
 
     output_path = Path(config.output.csv_path)
     write_opportunities(output_path, opportunities)

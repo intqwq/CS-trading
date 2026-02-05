@@ -21,8 +21,6 @@ def write_opportunities(path: Path, opportunities: Iterable[Opportunity]) -> Non
                 "margin_pct",
                 "bonus_pct",
                 "score",
-                "expected_profit_cny",
-                "spread_pct",
                 "volume",
                 "source",
             ]
@@ -38,8 +36,6 @@ def write_opportunities(path: Path, opportunities: Iterable[Opportunity]) -> Non
                     f"{opp.margin_pct:.2f}",
                     f"{opp.bonus_pct:.2f}",
                     f"{opp.score:.2f}",
-                    f"{opp.expected_profit_cny:.2f}",
-                    f"{opp.spread_pct:.2f}",
                     opp.volume,
                     opp.source,
                 ]

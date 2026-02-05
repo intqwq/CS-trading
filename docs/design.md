@@ -33,7 +33,7 @@ cs_trading/
 - **Expected margin**: `(sell_price - buy_price - fees) / buy_price`.
 - **Liquidity filter**: volume threshold and max spread.
 - **Bonus**: add `min(bonus_limit_pct, margin_pct * bonus_factor)`.
-- **Circuit breaker**: halt selection when cumulative downside exceeds `circuit_breaker_cny`.
+- **Circuit breaker**: halt if aggregate risk exceeds `circuit_breaker_cny`.
 
 ## Tradeup model (initial)
 - Tradeup is computed from item rarity/wear buckets.
@@ -42,4 +42,4 @@ cs_trading/
 
 ## Output
 CSV log with columns:
-- `timestamp`, `type`, `item_name`, `buy_cny`, `sell_cny`, `margin_pct`, `bonus_pct`, `score`, `expected_profit_cny`, `spread_pct`, `volume`, `source`
+- `timestamp`, `type`, `item_name`, `buy_cny`, `sell_cny`, `margin_pct`, `bonus_pct`, `score`, `volume`, `source`

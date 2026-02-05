@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from typing import List
 
 from .models import Opportunity
-from .scoring import compute_expected_profit, compute_margin_pct
 
 
 @dataclass(frozen=True)
@@ -22,9 +21,7 @@ def evaluate_tradeups(candidates: List[TradeupCandidate]) -> List[Opportunity]:
     for candidate in candidates:
         if candidate.buy_cny <= 0:
             continue
-        margin_pct = compute_margin_pct(candidate.buy_cny, candidate.sell_cny)
-        expected_profit_cny = compute_expected_profit(candidate.buy_cny, candidate.sell_cny)
-        spread_pct = 0.0
+        margin_pct = ((candidate.sell_cny - candidate.buy_cny) / candidate.buy_cny) * 100
         opportunities.append(
             Opportunity(
                 timestamp=timestamp,
@@ -35,8 +32,6 @@ def evaluate_tradeups(candidates: List[TradeupCandidate]) -> List[Opportunity]:
                 margin_pct=margin_pct,
                 bonus_pct=0.0,
                 score=margin_pct,
-                expected_profit_cny=expected_profit_cny,
-                spread_pct=spread_pct,
                 volume=candidate.volume,
                 source="BUFF",
             )
