@@ -1,0 +1,23 @@
+buff:
+  base_url: "https://buff.163.com"
+  game: "csgo"
+  request_delay_s: 1.0
+  user_agent: "cs-trading/0.1"
+
+scanner:
+  bonus_limit_pct: 5.0
+  budget_cny: 5000.0
+  circuit_breaker_cny: 1000.0
+  min_volume: 20
+  min_margin_pct: 2.0
+  max_spread_pct: 15.0
+
+output:
+  csv_path: "output/opportunities.csv"
+
+tradeup:
+  enabled: true
+  wear_tiers:
+    - "Factory New"
+    - "Minimal Wear"
+    - "Field-Tested"
